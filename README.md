@@ -3,7 +3,7 @@ Implementation of Toyota's Bean MPX protocol on the STM32
 
 Ported from the AVR https://github.com/specadmin/toyota-mpx/tree/master
 
-##Electrical interface
+## Electrical interface
 
 ![BeanMPX_Schematic](images/BeanMPX_Schematic.png)
 
@@ -18,10 +18,15 @@ Label another GPIO output pin as MPX_RX.
 Create a timer that overflows at 0.1ms with an interrupt in CubeIDE, for example with a 160Mhz clock:
 
 F_CLK = 160000000 hz
+
 PSC = 7
+
 ARR = 1999
+
 RCR = 0
+
 Time = (PSC + 1) * (ARR + 1) * (RCR + 1) / F_CLK
+
 Time = 0.0001 s
 
 ![CubeIDE_Timer](images/CubeIDE_Timer.png)
@@ -37,13 +42,14 @@ Set the following definitions in main.h
 #define MPX_CRC_HANDLE hcrc /*If your STM32 has hardware CRC, otherwise comment out to disable hardware crc*/
 ```
 
-Include mpx.h in your main.c
-Setup the interrupt handlers in main.c to call mpx_rx_interrupt(); on the rising and falling edges of the 
-MPX_RX pin and mpx_timer_interrupt(); when the timer referred to by MPX_TIM_HANDLE overflows.
-Initialise the MPX driver calling mpx_init(); with a callback function that is invoked upon recieving valid frames.
-Use mpx_send(); to send data on the bus, with an optional callback.
+Include mpx.h in your main.c and setup the interrupt handlers in main.c to call mpx_rx_interrupt() on the rising and falling edges of the 
+MPX_RX pin and mpx_timer_interrupt() when the timer referred to by MPX_TIM_HANDLE overflows.
 
-##Sample main.c
+Initialise the MPX driver calling mpx_init() with an optional callback function that is invoked upon recieving valid frames.
+
+Use mpx_send() to send data on the bus, with an optional callback.
+
+## Sample main.c
 
 ```C++
 #include "main.h"
