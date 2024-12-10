@@ -12,9 +12,11 @@ MPX_TX can be any GPIO output.
 
 ## Code
 
-Clone the repository into your project directory
+Clone the repository into your project directory (usually under the Drivers folder), and include in the compilation paths.
+
 Label one GPIO input pin as MPX_RX and set it as an external interrupt on rising and falling edges.
-Label another GPIO output pin as MPX_RX.
+Label another GPIO output pin as MPX_TX.
+
 Create a timer that overflows at 0.1ms with an interrupt in CubeIDE, for example with a 160Mhz clock:
 
 F_CLK = 160000000 hz
