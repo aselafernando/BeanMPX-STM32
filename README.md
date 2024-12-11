@@ -17,19 +17,19 @@ Clone the repository into your project directory (usually under the Drivers fold
 Label one GPIO input pin as MPX_RX and set it as an external interrupt on rising and falling edges.
 Label another GPIO output pin as MPX_TX.
 
-Create a timer that overflows at 0.1ms with an interrupt in CubeIDE, for example with a 160Mhz clock:
+Create a timer that has a frequency which will produce integers for the timing of a full bit and half bit at 10kbps, with an interrupt in CubeIDE. For example with a 160Mhz peripheral clock:
 
 F_CLK = 160000000 hz
 
+MPX_BAUD = 10000 bps
+
 PSC = 7
 
-ARR = 1999
+ARR = 65535 (Set to the maximum value, the driver will auto adjust this as required to the full and half bit values below)
 
-RCR = 0
+Full Bit = F_CLK / (PSC + 1) / MPX_BAUD - 1 = 1999
 
-Time = (PSC + 1) * (ARR + 1) * (RCR + 1) / F_CLK
-
-Time = 0.0001 s
+Half Bit = F_CLK / (PSC + 1) / MPX_BAUD / 2 - 1 = 999
 
 ![CubeIDE_Timer](images/CubeIDE_Timer.png)
 
