@@ -25,9 +25,9 @@
 #error "Definitions of MPX_RX_GPIO_Port or MPX_RX_Pin missing!"
 #endif
 
-#define MPX_TX(v) 	  HAL_GPIO_WritePin(MPX_TX_GPIO_Port, MPX_TX_Pin, v)
+#define MPX_TX(v)     HAL_GPIO_WritePin(MPX_TX_GPIO_Port, MPX_TX_Pin, v)
 #define MPX_TX_READ() HAL_GPIO_ReadPin(MPX_TX_GPIO_Port, MPX_TX_Pin)
-#define MPX_RX() 	  HAL_GPIO_ReadPin(MPX_RX_GPIO_Port, MPX_RX_Pin)
+#define MPX_RX()      HAL_GPIO_ReadPin(MPX_RX_GPIO_Port, MPX_RX_Pin)
 
 #define MPX_BAUD_RATE       10000
 #define MPX_MAX_PACKET_SIZE 15      // PRI + ML + DST-ID + MSG-ID + DATA
@@ -40,8 +40,8 @@
 #define full_bit_timer() __HAL_TIM_SET_COMPARE(&MPX_TIM_HANDLE, MPX_TIM_OC_CHAN, MPX_CLK / MPX_BAUD_RATE - 1)
 #define half_bit_timer() __HAL_TIM_SET_COMPARE(&MPX_TIM_HANDLE, MPX_TIM_OC_CHAN, MPX_CLK / MPX_BAUD_RATE / 2 - 1)
 #else
-#define full_bit_timer() __HAL_TIM_SET_AUTORELOAD(&MPX_TIM_HANDLE, F_CLK / MPX_CLK / MPX_BAUD_RATE - 1)
-#define half_bit_timer() __HAL_TIM_SET_AUTORELOAD(&MPX_TIM_HANDLE, F_CLK / MPX_CLK / MPX_BAUD_RATE / 2 - 1)
+#define full_bit_timer() __HAL_TIM_SET_AUTORELOAD(&MPX_TIM_HANDLE, MPX_CLK / MPX_BAUD_RATE - 1)
+#define half_bit_timer() __HAL_TIM_SET_AUTORELOAD(&MPX_TIM_HANDLE, MPX_CLK / MPX_BAUD_RATE / 2 - 1)
 #endif
 
 #ifndef MPX_TX_LED_OFF
@@ -493,7 +493,7 @@ uint8_t mpx_queue(uint8_t priority, uint8_t address, uint8_t size, const uint8_t
   return result;
 }
 
-inline void mpx_rx_interrupt(void)
+void mpx_rx_interrupt(void)
 {
   // resync the timer
   if(tx.state == TX_IN_PROGRESS)      // do not resync while transmission is in progress
@@ -525,15 +525,15 @@ inline void mpx_timer_interrupt(void)
     case TX_ARBITRATION:
       if(arbitration_lost())
       {
-	    suspend_transmission();
-	    get_bit();
+        suspend_transmission();
+        get_bit();
       }
       else
       {
-	    // arbitration is OK, continue the transmission
-	    stuffing_push(0);
-	    tx.state = TX_IN_PROGRESS;
-	    half_bit_timer();
+        // arbitration is OK, continue the transmission
+        stuffing_push(0);
+        tx.state = TX_IN_PROGRESS;
+        half_bit_timer();
       }
       break;
     case TX_IN_PROGRESS:
@@ -545,25 +545,25 @@ inline void mpx_timer_interrupt(void)
       // reception mode
       if(++rx.same_bit_counter > 6)
       {
-	    // idle state detected
-	    bus.idle = true;
-	    rx.busy = false;
-	    MPX_RX_LED_OFF();
-	    rx.same_bit_counter = 0;
-	    if(tx.state == TX_QUEUED)
-	    {
-	      // a packet is waiting for transmission
-	      start_transmission();
-	    }
-	    else
-	    {
-	      // go to idle mode
-	      stop_timer();
-	    }
+        // idle state detected
+        bus.idle = true;
+        rx.busy = false;
+        MPX_RX_LED_OFF();
+        rx.same_bit_counter = 0;
+        if(tx.state == TX_QUEUED)
+        {
+          // a packet is waiting for transmission
+          start_transmission();
+        }
+        else
+        {
+        // go to idle mode
+        stop_timer();
+        }
       }
       else
       {
-	    get_bit();
+        get_bit();
       }
   }
 }
@@ -578,11 +578,11 @@ void mpx_init(void (*rx_callback)(uint8_t size, const uint8_t* buf))
   stuffing.prev = 0;
 
   //Start timer using HAL which sets up all the registers and callbacks
-#ifdef MPX_TIM_OC_CHAN
+  #ifdef MPX_TIM_OC_CHAN
   HAL_TIM_OC_Start_IT(&MPX_TIM_HANDLE, MPX_TIM_OC_CHAN);
-#else
+  #else
   HAL_TIM_Base_Start_IT(&MPX_TIM_HANDLE);
-#endif
+  #endif
   //Disable Timer counting
   MPX_TIM_HANDLE.Instance->CR1 &= ~TIM_CR1_CEN;
   //Reset the count back to 0
